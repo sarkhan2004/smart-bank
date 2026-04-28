@@ -1,0 +1,10 @@
+spring:
+  profiles:
+    include: db
+  application:
+    name: smart-bank
+  jpa:
+    open-in-view: false
+    show-sql: true
+    hibernate:
+      ddl-auto: update
