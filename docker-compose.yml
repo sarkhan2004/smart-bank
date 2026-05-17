@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: smartbank-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: authdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: smartbank-redis
+    ports:
+      - "6379:6379"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: smartbank-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: smartbank-kafka-ui
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      - kafka
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: smartbank-zipkin
+    ports:
+      - "9411:9411"
+
+volumes:
+  postgres_data:
